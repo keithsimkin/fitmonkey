@@ -42,7 +42,7 @@ export function PageSkeleton() {
   return (
     <div className="space-y-6 px-4 pt-6" aria-hidden>
       <Skeleton className="h-9 w-40 rounded-2xl" />
-      <Skeleton className="h-40 w-full rounded-4xl" />
+      <Skeleton className="h-40 w-full rounded-2xl" />
       <div className="space-y-3">
         <Skeleton className="h-24 w-full rounded-3xl" />
         <Skeleton className="h-24 w-full rounded-3xl" />

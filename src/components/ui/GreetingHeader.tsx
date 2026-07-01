@@ -29,7 +29,7 @@ export function GreetingHeader({
       </div>
       <button
         onClick={onBell}
-        className="press relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-card dark:bg-surface-dark"
+        className="press relative flex h-11 w-11 items-center justify-center rounded-2xl border border-black/[0.07] bg-white dark:border-white/10 dark:bg-surface-dark"
       >
         <Bell className="h-5 w-5" />
         {badgeCount != null && badgeCount > 0 && (

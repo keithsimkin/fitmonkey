@@ -35,12 +35,7 @@ module.exports = konstaConfig({
         gain: '#27C281',
       },
       boxShadow: {
-        card: '0 8px 26px -12px rgba(17, 24, 39, 0.20), 0 1px 2px rgba(17, 24, 39, 0.04)',
-        'card-dark': '0 12px 32px -14px rgba(0, 0, 0, 0.7)',
         nav: '0 10px 30px -8px rgba(17, 24, 39, 0.22)',
-      },
-      borderRadius: {
-        '4xl': '28px',
       },
       fontFamily: {
         ios: [

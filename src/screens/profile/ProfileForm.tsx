@@ -226,7 +226,7 @@ export function ProfileForm({ onDone, submitLabel = 'Save Profile' }: Props) {
 
       <button
         onClick={save}
-        className="press w-full rounded-2xl bg-coral py-4 text-[17px] font-bold text-white shadow-card"
+        className="press w-full rounded-2xl bg-coral py-4 text-[17px] font-bold text-white"
       >
         {submitLabel}
       </button>

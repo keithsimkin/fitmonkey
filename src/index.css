@@ -49,18 +49,18 @@ html.dark body {
 }
 
 /* ----------------------------------------------------------------------------
-   Card-based design language (replaces Liquid Glass for app surfaces).
+   Flat grouped-list surfaces (iOS Settings style): no elevation, hairline
+   borders, restrained radius. Content sits on the page background and is
+   separated by hairlines rather than floating on drop shadows.
 ---------------------------------------------------------------------------- */
 .card {
   background-color: #ffffff;
-  border-radius: 24px;
-  box-shadow:
-    0 8px 26px -12px rgba(17, 24, 39, 0.2),
-    0 1px 2px rgba(17, 24, 39, 0.04);
+  border-radius: 16px;
+  border: 1px solid rgba(17, 24, 39, 0.07);
 }
 html.dark .card {
   background-color: #17181c;
-  box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* Tactile press feedback for tappable cards/buttons. */

@@ -65,6 +65,7 @@ interface AppState {
   logs: Record<string, DailyLog>;
   profile: UserProfile | null;
   weightLog: WeightEntry[];
+  notificationsReadAt: number; // ms epoch the notification feed was last opened
 
   // log helpers
   ensureLog: (dayKey: string) => DailyLog;
@@ -96,6 +97,9 @@ interface AppState {
   updateSettings: (patch: Partial<Settings>) => void;
   setHomeEquipment: (equipment: Equipment[]) => void;
   resetAll: () => void;
+
+  // notifications
+  markNotificationsRead: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -106,6 +110,7 @@ export const useAppStore = create<AppState>()(
       logs: {},
       profile: null,
       weightLog: [],
+      notificationsReadAt: 0,
 
       ensureLog: (dayKey) => {
         const existing = get().logs[dayKey];
@@ -273,11 +278,14 @@ export const useAppStore = create<AppState>()(
           logs: {},
           profile: null,
           weightLog: [],
+          notificationsReadAt: 0,
         }),
+
+      markNotificationsRead: () => set({ notificationsReadAt: Date.now() }),
     }),
     {
       name: 'workout-app-state',
-      version: 3,
+      version: 4,
       migrate: (persisted, version) => {
         const state = (persisted ?? {}) as Partial<AppState>;
         if (version < 2) {
@@ -288,6 +296,10 @@ export const useAppStore = create<AppState>()(
         if (version < 3 && state.settings && state.settings.sound === undefined) {
           // v2 had no sound preference; default it on.
           state.settings.sound = true;
+        }
+        if (version < 4 && state.notificationsReadAt === undefined) {
+          // v3 had no notification feed; start with everything unread.
+          state.notificationsReadAt = 0;
         }
         return state as AppState;
       },

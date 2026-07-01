@@ -33,6 +33,7 @@ export function TabLayout() {
         </Suspense>
       </div>
 
+      {/* Floating pill tab bar. */}
       <nav className="fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-[calc(12px+var(--sab))]">
         <div className="flex w-full max-w-md items-stretch gap-1 rounded-[26px] bg-white/95 p-1.5 shadow-nav backdrop-blur-xl dark:bg-surface-dark/95">
           {TABS.map(({ to, label, Icon }) => {

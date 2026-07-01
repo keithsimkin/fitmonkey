@@ -4,12 +4,13 @@ import { Flame, Scale, Timer, Sparkles, ChevronRight, Dumbbell } from 'lucide-re
 import { useAppStore } from '../../store/useAppStore';
 import { usePrescription } from '../../hooks/usePrescription';
 import { useStreak } from '../../hooks/useStreak';
+import { useNotifications } from '../../hooks/useNotifications';
 import { planProgress } from '../../store/selectors';
 import { latestWeightKg, weightDeltaKg } from '../../lib/stats';
 import { kgToDisplay } from '../../lib/units';
 import { todayKey } from '../../lib/dates';
-import { startCue } from '../../lib/audioCue';
 import { GreetingHeader } from '../../components/ui/GreetingHeader';
+import { WeekStreak } from '../../components/ui/WeekStreak';
 import { Card } from '../../components/ui/Card';
 import { SectionHeader } from '../../components/ui/SectionHeader';
 import { StatRow } from '../../components/ui/StatRow';
@@ -27,11 +28,13 @@ export function HomeScreen() {
 
   const profile = useAppStore((s) => s.profile);
   const log = useAppStore((s) => s.logs[key]);
+  const logs = useAppStore((s) => s.logs);
   const weightLog = useAppStore((s) => s.weightLog);
   const units = useAppStore((s) => s.settings.units);
-  const startSession = useAppStore((s) => s.startSession);
+  const startWeekday = useAppStore((s) => s.settings.startWeekday);
   const setMode = useAppStore((s) => s.setMode);
   const streak = useStreak();
+  const { unreadCount } = useNotifications();
 
   const { plan, splitDay, loading, regenerate, skipRest } = usePrescription(key);
   const progress = useMemo(() => planProgress(log), [log]);
@@ -50,10 +53,8 @@ export function HomeScreen() {
   const deltaKg = weightDeltaKg(weightLog);
 
   function startWorkout() {
-    // Sound the start cue only when the session is genuinely beginning, and
-    // from this tap so iOS unlocks audio (a later mount effect would be muted).
-    if (!log?.startedAt) startCue();
-    startSession(key);
+    // Open the workout screen; the session clock and start cue now begin from
+    // the explicit Start button there (so the elapsed time reflects real work).
     navigate('/workout');
   }
 
@@ -61,9 +62,16 @@ export function HomeScreen() {
     <div className="space-y-7 px-4 pb-4 pt-2">
       <GreetingHeader
         name={profile?.name ?? ''}
-        badgeCount={progress.total - progress.done}
+        badgeCount={unreadCount}
         onAvatar={() => navigate('/profile')}
-        onBell={() => navigate('/stats')}
+        onBell={() => navigate('/notifications')}
+      />
+
+      <WeekStreak
+        logs={logs}
+        weekStartsOn={startWeekday}
+        streak={streak}
+        onOpen={() => navigate('/history')}
       />
 
       {profile && !splitDay?.isRest && (
@@ -260,7 +268,7 @@ function ProgressHero({
   return (
     <button
       onClick={onStart}
-      className="press relative w-full overflow-hidden rounded-4xl bg-ink px-6 py-5 text-left text-white shadow-card"
+      className="press relative w-full overflow-hidden rounded-2xl bg-ink px-6 py-5 text-left text-white"
     >
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
@@ -279,7 +287,7 @@ function ProgressHero({
 
 function RestCard({ streak, onSkip }: { streak: number; onSkip: () => void }) {
   return (
-    <div className="rounded-4xl bg-mint p-5 text-white shadow-card">
+    <div className="rounded-2xl bg-mint p-5 text-white">
       <p className="text-[13px] font-medium text-white/80">Today</p>
       <p className="mt-1 text-[26px] font-extrabold">Rest Day 😌</p>
       <p className="mt-1 text-[14px] text-white/85">
@@ -287,7 +295,7 @@ function RestCard({ streak, onSkip }: { streak: number; onSkip: () => void }) {
       </p>
       <button
         onClick={onSkip}
-        className="press mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-[14px] font-bold text-mint"
+        className="press mt-4 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-[14px] font-bold text-mint"
       >
         <Dumbbell className="h-4 w-4" /> Skip &amp; train instead
       </button>
@@ -299,14 +307,14 @@ function OnboardingCard({ onStart }: { onStart: () => void }) {
   return (
     <button
       onClick={onStart}
-      className="press w-full overflow-hidden rounded-4xl bg-coral p-5 text-left text-white shadow-card"
+      className="press w-full overflow-hidden rounded-2xl bg-coral p-5 text-left text-white"
     >
       <Sparkles className="h-7 w-7" />
       <p className="mt-3 text-[22px] font-extrabold leading-tight">Set up your coach</p>
       <p className="mt-1 text-[14px] text-white/85">
         Tell us your goals and details — we'll build your workouts automatically, on device.
       </p>
-      <span className="mt-4 inline-flex items-center gap-1 rounded-full bg-white px-4 py-2 text-[14px] font-bold text-coral">
+      <span className="mt-4 inline-flex items-center gap-1 rounded-xl bg-white px-4 py-2 text-[14px] font-bold text-coral">
         Get started <ChevronRight className="h-4 w-4" />
       </span>
     </button>

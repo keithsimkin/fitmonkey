@@ -14,8 +14,15 @@ import {
   HardDrive,
   Info,
   Trash2,
+  Cloud,
+  RefreshCw,
+  LogOut,
 } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { useAppStore } from '../../store/useAppStore';
+import { useAuthStore } from '../../store/useAuthStore';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { getLastSyncedAt, syncNow } from '../../lib/sync';
 import { Card } from '../../components/ui/Card';
 import { Avatar } from '../../components/ui/Avatar';
 import { Toggle } from '../../components/ui/Toggle';
@@ -65,6 +72,13 @@ export function SettingsScreen() {
           <ChevronRight className="h-5 w-5 shrink-0 text-neutral-300 dark:text-neutral-600" />
         </Card>
 
+        {/* Account & cloud sync (only when Supabase is configured) */}
+        {isSupabaseConfigured && (
+          <Section label="Account & sync">
+            <AccountSection />
+          </Section>
+        )}
+
         {/* Appearance — visual tiles instead of a pill-in-card control */}
         <Section label="Appearance">
           <div className="grid grid-cols-3 gap-3">
@@ -74,10 +88,10 @@ export function SettingsScreen() {
                 <button
                   key={value}
                   onClick={() => updateSettings({ themeMode: value })}
-                  className={`press flex flex-col items-center gap-2 rounded-3xl border-2 py-4 shadow-card transition-colors ${
+                  className={`press flex flex-col items-center gap-2 rounded-2xl border py-4 transition-colors ${
                     active
                       ? 'border-coral bg-coral-soft/70 text-coral dark:bg-coral/15'
-                      : 'border-transparent bg-white text-neutral-500 dark:bg-surface-dark dark:text-neutral-400'
+                      : 'border-black/[0.07] bg-white text-neutral-500 dark:border-white/10 dark:bg-surface-dark dark:text-neutral-400'
                   }`}
                 >
                   <Icon className="h-6 w-6" strokeWidth={active ? 2.4 : 2} />
@@ -145,10 +159,11 @@ export function SettingsScreen() {
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-[15px] font-bold">Private &amp; on-device</p>
+              <p className="text-[15px] font-bold">Private &amp; local-first</p>
               <p className="mt-0.5 text-[13px] leading-snug text-neutral-500 dark:text-neutral-400">
-                Your profile, workouts and weigh-ins live only on this device — there's no
-                account and nothing is uploaded.
+                {isSupabaseConfigured
+                  ? "Your data lives on this device and works fully offline. Sign in above to also back it up to your private cloud — only you can read it."
+                  : "Your profile, workouts and weigh-ins live only on this device — there's no account and nothing is uploaded."}
               </p>
             </div>
           </Card>
@@ -197,6 +212,80 @@ export function SettingsScreen() {
         </p>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Account & sync
+// ---------------------------------------------------------------------------
+
+/** Shows a sign-in prompt when logged out, or account + sync controls when in. */
+function AccountSection() {
+  const navigate = useNavigate();
+  const status = useAuthStore((s) => s.status);
+  const email = useAuthStore((s) => s.user?.email ?? null);
+  const signOut = useAuthStore((s) => s.signOut);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSynced, setLastSynced] = useState<number>(getLastSyncedAt());
+
+  // The last-synced time lives outside the store; poll it so the row stays fresh.
+  useEffect(() => {
+    if (status !== 'in') return;
+    const id = setInterval(() => setLastSynced(getLastSyncedAt()), 5000);
+    return () => clearInterval(id);
+  }, [status]);
+
+  if (status !== 'in') {
+    return (
+      <Card className="press flex items-center gap-3.5 p-4" onClick={() => navigate('/login')}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-ios-blue/10 text-ios-blue">
+          <Cloud className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[16px] font-semibold">Sign in to sync</p>
+          <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
+            Back up &amp; restore across devices with a magic link
+          </p>
+        </div>
+        <ChevronRight className="h-5 w-5 shrink-0 text-neutral-300 dark:text-neutral-600" />
+      </Card>
+    );
+  }
+
+  async function handleSync() {
+    if (syncing) return;
+    setSyncing(true);
+    try {
+      await syncNow();
+    } finally {
+      setSyncing(false);
+      setLastSynced(getLastSyncedAt());
+    }
+  }
+
+  return (
+    <Card className="divide-y divide-black/5 dark:divide-white/10">
+      <Row icon={<Cloud className="h-5 w-5" />} tint="bg-ios-blue/10 text-ios-blue" label="Signed in">
+        <Value>{email ?? '—'}</Value>
+      </Row>
+      <button onClick={() => void handleSync()} className="press flex w-full items-center gap-3 px-4 py-3 text-left">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-mint/15 text-mint">
+          <RefreshCw className={`h-5 w-5 ${syncing ? 'animate-spin' : ''}`} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[16px] font-semibold">{syncing ? 'Syncing…' : 'Sync now'}</p>
+          <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
+            {lastSynced ? `Last synced ${formatDistanceToNow(lastSynced, { addSuffix: true })}` : 'Not synced yet'}
+          </p>
+        </div>
+      </button>
+      <button onClick={() => void signOut()} className="press flex w-full items-center gap-3 px-4 py-3 text-left">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-coral-soft text-coral dark:bg-coral/15">
+          <LogOut className="h-5 w-5" />
+        </div>
+        <p className="min-w-0 flex-1 text-[16px] font-semibold text-coral">Sign out</p>
+      </button>
+    </Card>
   );
 }
 
@@ -275,9 +364,9 @@ function InlineChoice<T extends string>({
           <button
             key={o.value}
             onClick={() => onChange(o.value)}
-            className={`rounded-full px-3.5 py-1.5 text-[14px] font-semibold transition-colors ${
+            className={`rounded-lg px-3.5 py-1.5 text-[14px] font-semibold transition-colors ${
               active
-                ? 'bg-coral text-white shadow-sm'
+                ? 'bg-coral text-white'
                 : 'text-neutral-400 active:opacity-70 dark:text-neutral-500'
             }`}
           >

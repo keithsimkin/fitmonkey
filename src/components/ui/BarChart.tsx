@@ -27,7 +27,7 @@ export function BarChart({ bars, height = 150, color = '#1FD0B0', className = ''
             <div className="relative flex w-full flex-1 items-end justify-center">
               {b.badge && b.highlight && (
                 <span
-                  className="absolute -top-1 z-10 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white"
+                  className="absolute -top-1 z-10 rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white"
                   style={{ backgroundColor: color }}
                 >
                   {b.badge}

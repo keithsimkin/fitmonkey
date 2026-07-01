@@ -30,8 +30,19 @@ const ProfileScreen = lazy(() =>
 const WorkoutScreen = lazy(() =>
   import('../screens/workout/WorkoutScreen').then((m) => ({ default: m.WorkoutScreen })),
 );
+const NotificationsScreen = lazy(() =>
+  import('../screens/notifications/NotificationsScreen').then((m) => ({
+    default: m.NotificationsScreen,
+  })),
+);
 const IntervalTimerScreen = lazy(() =>
   import('../screens/timer/IntervalTimerScreen').then((m) => ({ default: m.IntervalTimerScreen })),
+);
+const HistoryScreen = lazy(() =>
+  import('../screens/history/HistoryScreen').then((m) => ({ default: m.HistoryScreen })),
+);
+const LoginScreen = lazy(() =>
+  import('../screens/auth/LoginScreen').then((m) => ({ default: m.LoginScreen })),
 );
 
 export const router = createBrowserRouter([
@@ -50,8 +61,11 @@ export const router = createBrowserRouter([
       // Full-screen routes (no tab bar).
       { path: 'discover/:key', element: <CategoryScreen /> },
       { path: 'profile', element: <ProfileScreen /> },
+      { path: 'notifications', element: <NotificationsScreen /> },
+      { path: 'history', element: <HistoryScreen /> },
       { path: 'workout', element: <WorkoutScreen /> },
       { path: 'timer', element: <IntervalTimerScreen /> },
+      { path: 'login', element: <LoginScreen /> },
     ],
   },
 ]);

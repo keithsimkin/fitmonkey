@@ -107,7 +107,7 @@ export function IntervalTimerScreen() {
             {finished ? (
               <button
                 onClick={startAll}
-                className="press rounded-full bg-mint px-8 py-4 text-[17px] font-bold text-ink"
+                className="press rounded-xl bg-mint px-8 py-4 text-[17px] font-bold text-ink"
               >
                 Again
               </button>
@@ -190,7 +190,7 @@ export function IntervalTimerScreen() {
 
         <button
           onClick={startAll}
-          className="press w-full rounded-2xl bg-coral py-4 text-[17px] font-bold text-white shadow-card"
+          className="press w-full rounded-2xl bg-coral py-4 text-[17px] font-bold text-white"
         >
           Start
         </button>

@@ -8,7 +8,7 @@ import { isExerciseDone } from '../../store/selectors';
 import { ensureSeeded, getExerciseById } from '../../data/db';
 import { todayKey } from '../../lib/dates';
 import { formatClock, formatRest } from '../../lib/format';
-import { finishCue } from '../../lib/audioCue';
+import { startCue } from '../../lib/audioCue';
 import { ExerciseGif } from '../../components/exercise/ExerciseGif';
 import { ExerciseListSkeleton } from '../../components/ui/Skeleton';
 import { RestTimerProvider } from '../../components/timer/RestTimerProvider';
@@ -17,6 +17,7 @@ import type { Exercise } from '../../types/exercise';
 import type { PlannedExercise } from '../../types/app';
 import { ExerciseDetailSheet } from './ExerciseDetailSheet';
 import { AddExerciseSheet } from './AddExerciseSheet';
+import { WorkoutPlayer } from './WorkoutPlayer';
 
 export function WorkoutScreen() {
   return (
@@ -41,11 +42,7 @@ function WorkoutInner() {
   const [selected, setSelected] = useState<{ ex: Exercise; planned?: PlannedExercise } | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [exMap, setExMap] = useState<Record<string, Exercise>>({});
-
-  // Start the session clock once the screen opens.
-  useEffect(() => {
-    startSession(key);
-  }, [key, startSession]);
+  const [playing, setPlaying] = useState(false);
 
   const plannedIds = useMemo(
     () => new Set((plan?.exercises ?? []).map((e) => e.exerciseId)),
@@ -86,15 +83,20 @@ function WorkoutInner() {
     }
   }
 
-  function finish() {
-    finishCue();
-    completeDay(key);
-    navigate('/');
+  const started = !!log?.startedAt;
+  const completed = !!log?.completedAt;
+
+  // The session clock (and start cue) begin from this explicit tap, not on mount.
+  function beginWorkout() {
+    if (!started) startCue();
+    startSession(key);
+    setPlaying(true);
   }
 
   const equipment = log?.equipment ?? defaultEquipment[log?.mode ?? 'home'];
   const doneCount = (plan?.exercises ?? []).filter((pe) => isExerciseDone(log, pe.exerciseId)).length;
   const total = plan?.exercises.length ?? 0;
+  const ctaLabel = completed ? 'Review Workout' : started ? 'Resume Workout' : 'Start Workout';
 
   return (
     <div className="flex h-full flex-col">
@@ -104,10 +106,14 @@ function WorkoutInner() {
           <ChevronLeft className="h-6 w-6" />
           <span className="text-[16px]">Home</span>
         </button>
-        <div className="flex items-center gap-1.5 text-[15px] font-semibold tabular-nums text-neutral-500">
-          <Timer className="h-4 w-4" />
-          {formatClock(elapsed)}
-        </div>
+        {started ? (
+          <div className="flex items-center gap-1.5 text-[15px] font-semibold tabular-nums text-neutral-500">
+            <Timer className="h-4 w-4" />
+            {formatClock(elapsed)}
+          </div>
+        ) : (
+          <span />
+        )}
         <button
           onClick={() => regenerate()}
           className="press flex h-9 w-9 items-center justify-center rounded-full bg-black/5 dark:bg-white/10"
@@ -212,15 +218,32 @@ function WorkoutInner() {
         )}
       </div>
 
-      {/* Finish bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-[calc(12px+var(--sab))]">
-        <button
-          onClick={finish}
-          className="press w-full max-w-md rounded-2xl bg-mint py-4 text-[17px] font-bold text-ink shadow-card"
-        >
-          Finish Workout{doneCount > 0 ? ` · ${doneCount} done` : ''}
-        </button>
-      </div>
+      {/* Start / resume bar */}
+      {plan && !splitDay?.isRest && (
+        <div className="fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-[calc(12px+var(--sab))]">
+          <button
+            onClick={beginWorkout}
+            className="press w-full max-w-md rounded-2xl bg-coral py-4 text-[17px] font-bold text-white"
+          >
+            {ctaLabel}
+            {!completed && doneCount > 0 ? ` · ${doneCount}/${total} done` : ''}
+          </button>
+        </div>
+      )}
+
+      {playing && plan && (
+        <WorkoutPlayer
+          dayKey={key}
+          plan={plan}
+          splitDay={splitDay}
+          onExit={() => setPlaying(false)}
+          onFinish={() => {
+            completeDay(key);
+            setPlaying(false);
+            navigate('/');
+          }}
+        />
+      )}
 
       <ExerciseDetailSheet
         exercise={selected?.ex ?? null}

@@ -1,4 +1,15 @@
-import { subDays, startOfMonth, startOfWeek, addDays, isAfter, format } from 'date-fns';
+import {
+  subDays,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+  isAfter,
+  isSameDay,
+  isSameMonth,
+  format,
+} from 'date-fns';
 import type { DailyLog, WeightEntry } from '../types/app';
 import type { ExperienceLevel } from '../engine/types';
 import { dayKey, fromDayKey } from './dates';
@@ -204,4 +215,120 @@ export function consistencyGrid(
     columns.push(col);
   }
   return columns;
+}
+
+/** One day cell in the home screen's current-week strip. */
+export interface WeekDayCell {
+  dayKey: string;
+  date: Date;
+  isToday: boolean;
+  worked: boolean;
+  isRest: boolean;
+  inFuture: boolean;
+}
+
+/**
+ * The seven days of `today`'s week (week-start honouring the user's setting),
+ * flagged for the home strip: which days were trained, rest, today, or future.
+ */
+export function weekStrip(
+  logs: Record<string, DailyLog>,
+  today: Date,
+  weekStartsOn: 0 | 1,
+): WeekDayCell[] {
+  const weekStart = startOfWeek(today, { weekStartsOn });
+  const cells: WeekDayCell[] = [];
+  for (let d = 0; d < 7; d++) {
+    const date = addDays(weekStart, d);
+    const key = dayKey(date);
+    const log = logs[key];
+    cells.push({
+      dayKey: key,
+      date,
+      isToday: isSameDay(date, today),
+      worked: !!log?.completedAt,
+      isRest: log?.status === 'rest',
+      inFuture: isAfter(date, today),
+    });
+  }
+  return cells;
+}
+
+// ---------------------------------------------------------------------------
+// Full-month calendar grid + streak history (History screen).
+// ---------------------------------------------------------------------------
+
+/** One day cell in the month calendar. */
+export interface CalendarDayCell {
+  dayKey: string;
+  date: Date;
+  inMonth: boolean; // false for the leading/trailing days of adjacent months
+  isToday: boolean;
+  worked: boolean; // a workout was completed this day
+  isRest: boolean; // the day was marked as rest
+  doneSets: number; // ticked sets logged (0 = nothing logged)
+  inFuture: boolean;
+}
+
+/**
+ * The calendar weeks (each 7 cells, week-start honouring the user's setting)
+ * covering the month that contains `month`, padded with leading/trailing days
+ * from the neighbouring months so every row is full.
+ */
+export function monthMatrix(
+  logs: Record<string, DailyLog>,
+  month: Date,
+  today: Date,
+  weekStartsOn: 0 | 1,
+): CalendarDayCell[][] {
+  const gridStart = startOfWeek(startOfMonth(month), { weekStartsOn });
+  const gridEnd = endOfWeek(endOfMonth(month), { weekStartsOn });
+  const weeks: CalendarDayCell[][] = [];
+  let cursor = gridStart;
+  while (cursor <= gridEnd) {
+    const week: CalendarDayCell[] = [];
+    for (let d = 0; d < 7; d++) {
+      const key = dayKey(cursor);
+      const log = logs[key];
+      week.push({
+        dayKey: key,
+        date: cursor,
+        inMonth: isSameMonth(cursor, month),
+        isToday: isSameDay(cursor, today),
+        worked: !!log?.completedAt,
+        isRest: log?.status === 'rest',
+        doneSets: log
+          ? log.exercises.reduce((n, e) => n + e.sets.filter((s) => s.done).length, 0)
+          : 0,
+        inFuture: isAfter(cursor, today),
+      });
+      cursor = addDays(cursor, 1);
+    }
+    weeks.push(week);
+  }
+  return weeks;
+}
+
+/**
+ * Longest run of completed-workout days ever recorded, treating rest days as
+ * transparent (they neither extend nor break a run) — same rules the live
+ * streak uses, so the two numbers stay consistent.
+ */
+export function longestStreak(logs: Record<string, DailyLog>, today: Date): number {
+  const keys = Object.keys(logs).sort();
+  if (keys.length === 0) return 0;
+  let cursor = fromDayKey(keys[0]);
+  let run = 0;
+  let best = 0;
+  while (!isAfter(cursor, today)) {
+    const log = logs[dayKey(cursor)];
+    if (log?.completedAt) {
+      run += 1;
+      if (run > best) best = run;
+    } else if (log?.status !== 'rest') {
+      run = 0; // a non-rest gap breaks the run; rest days keep it alive
+    }
+    cursor = addDays(cursor, 1);
+  }
+  return best;
 }

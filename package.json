@@ -13,6 +13,7 @@
     "icons": "bun run scripts/make-icons.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.0",
     "date-fns": "^4.4.0",
     "framer-motion": "^12.42.1",
     "idb": "^8.0.3",

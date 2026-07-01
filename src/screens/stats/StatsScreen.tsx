@@ -1,5 +1,5 @@
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
-import { Plus, Flame, Dumbbell, CalendarCheck, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, Flame, Dumbbell, CalendarCheck, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { useStreak } from '../../hooks/useStreak';
 import { SegmentedControl } from '../../components/ios/SegmentedControl';
@@ -60,6 +60,8 @@ export function StatsScreen() {
   const today = useMemo(() => new Date(), []);
   const weightKg = latestWeightKg(weightLog);
   const deltaKg = weightDeltaKg(weightLog);
+  const changeKg =
+    weightKg != null && weightLog.length > 0 ? weightKg - weightLog[0].kg : undefined;
 
   const buckets = period === 'monthly'
     ? monthlyBuckets(weightLog, today, 7)
@@ -94,32 +96,22 @@ export function StatsScreen() {
         </p>
       </div>
 
-      {/* Current weight hero (always-dark, per the reference) */}
+      {/* Current weight hero */}
       <div className="px-4">
-        <div className="rounded-4xl bg-ink p-5 text-white shadow-card">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[13px] text-white/60">Current Weight</p>
-              <p className="mt-1 text-[38px] font-extrabold leading-none">
-                {weightKg != null ? kgToDisplay(weightKg, units).toFixed(1) : '—'}
-                <span className="ml-1 text-[18px] font-bold text-white/70">{units}</span>
-              </p>
-              {deltaKg != null && (
-                <span
-                  className={`mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-semibold ${
-                    deltaKg <= 0 ? 'bg-mint/20 text-mint' : 'bg-white/10 text-white/80'
-                  }`}
-                >
-                  {deltaKg <= 0 ? (
-                    <TrendingDown className="h-3.5 w-3.5" />
-                  ) : (
-                    <TrendingUp className="h-3.5 w-3.5" />
-                  )}
-                  {Math.abs(kgToDisplay(deltaKg, units)).toFixed(1)} {units}
-                </span>
-              )}
+        <div
+          className="relative overflow-hidden rounded-2xl p-5 text-white"
+          style={{
+            background:
+              'radial-gradient(130% 90% at 100% 0%, rgba(31,208,176,0.22), rgba(31,208,176,0) 55%), linear-gradient(160deg, #1b1c23, #0e0f12)',
+          }}
+        >
+          {/* Header row */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 text-white/55">
+              <Scale className="h-4 w-4" />
+              <span className="text-[13px] font-medium">Current Weight</span>
             </div>
-            <div className="w-32 shrink-0">
+            <div className="w-[132px] shrink-0">
               <SegmentedControl<Period>
                 value={period}
                 onChange={setPeriod}
@@ -131,19 +123,70 @@ export function StatsScreen() {
             </div>
           </div>
 
-          <div className="mt-5">
-            {weightLog.length === 0 ? (
-              <p className="py-8 text-center text-[14px] text-white/50">
-                No weigh-ins yet. Tap “Log weight”.
-              </p>
-            ) : (
-              <BarChart bars={bars} color="#1FD0B0" height={140} />
+          {/* Weight + trend chip */}
+          <div className="mt-3 flex items-end gap-2.5">
+            <p className="text-[46px] font-extrabold leading-none tracking-tight">
+              {weightKg != null ? kgToDisplay(weightKg, units).toFixed(1) : '—'}
+              <span className="ml-1 text-[18px] font-bold text-white/55">{units}</span>
+            </p>
+            {deltaKg != null && (
+              <span
+                className={`mb-1.5 inline-flex items-center gap-0.5 rounded-lg px-2 py-0.5 text-[12px] font-bold ${
+                  deltaKg <= 0 ? 'bg-mint/20 text-mint' : 'bg-white/10 text-white/80'
+                }`}
+              >
+                {deltaKg <= 0 ? (
+                  <TrendingDown className="h-3.5 w-3.5" />
+                ) : (
+                  <TrendingUp className="h-3.5 w-3.5" />
+                )}
+                {Math.abs(kgToDisplay(deltaKg, units)).toFixed(1)}
+              </span>
             )}
           </div>
 
+          {/* Mini stats */}
+          {weightLog.length > 0 && (
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {[
+                { label: 'Start', value: kgToDisplay(weightLog[0].kg, units).toFixed(1), accent: false },
+                {
+                  label: 'Change',
+                  value:
+                    changeKg != null
+                      ? `${changeKg >= 0 ? '+' : ''}${kgToDisplay(changeKg, units).toFixed(1)}`
+                      : '—',
+                  accent: changeKg != null && changeKg < 0,
+                },
+                { label: 'Entries', value: String(weightLog.length), accent: false },
+              ].map((s) => (
+                <div key={s.label} className="rounded-2xl bg-white/[0.05] px-3 py-2">
+                  <p className="text-[11px] text-white/45">{s.label}</p>
+                  <p className={`text-[15px] font-bold tabular-nums ${s.accent ? 'text-mint' : 'text-white'}`}>
+                    {s.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Chart panel */}
+          <div className="mt-4 rounded-3xl bg-white/[0.05] p-3">
+            {weightLog.length === 0 ? (
+              <div className="flex flex-col items-center gap-1.5 py-8 text-center">
+                <Scale className="h-7 w-7 text-white/25" />
+                <p className="text-[14px] font-medium text-white/60">No weigh-ins yet</p>
+                <p className="text-[12px] text-white/35">Log your weight to see your trend.</p>
+              </div>
+            ) : (
+              <BarChart bars={bars} color="#1FD0B0" height={128} />
+            )}
+          </div>
+
+          {/* Log weight */}
           <button
             onClick={() => setLogOpen(true)}
-            className="press mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-white/10 py-3 text-[15px] font-semibold"
+            className="press mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-mint py-3 text-[15px] font-bold text-ink"
           >
             <Plus className="h-4 w-4" /> Log weight
           </button>

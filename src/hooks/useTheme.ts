@@ -17,6 +17,10 @@ export function useTheme() {
       root.classList.toggle('dark', dark);
       // Konsta reads this attribute for its dark variants.
       root.classList.toggle('k-ios', true);
+      // Match the phone status bar to the app background (see index.css body bg).
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute('content', dark ? '#0b0b0e' : '#f1f2f4');
     };
 
     apply();

@@ -2,6 +2,8 @@ import { Suspense, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { useAppStore } from '../store/useAppStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { useSync } from '../hooks/useSync';
 import { setFeedbackEnabled } from '../lib/audioCue';
 import { PageSkeleton } from '../components/ui/Skeleton';
 
@@ -9,6 +11,13 @@ import { PageSkeleton } from '../components/ui/Skeleton';
 export function RootLayout() {
   useTheme();
   const sound = useAppStore((s) => s.settings.sound);
+  const initAuth = useAuthStore((s) => s.init);
+
+  // Boot auth once, then keep cloud sync in step with the session.
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+  useSync();
 
   // Keep the audio/haptics module in sync with the user's Sounds preference.
   useEffect(() => {
