@@ -28,7 +28,10 @@ const FRAME_MS = 750;
  * first frame loads; glyph on error.
  */
 export function ExerciseGif({
-  images,
+  // Default to no frames so a missing/stale `images` (e.g. a plan persisted
+  // before the free-exercise-db image field existed) degrades to the glyph
+  // fallback instead of crashing on `.map`.
+  images = [],
   alt,
   className = '',
   rounded = true,
