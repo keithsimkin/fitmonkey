@@ -33,12 +33,14 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
         runtimeCaching: [
           {
-            // Exercise animation GIFs — cache on first view so sessions work offline.
-            urlPattern: /^https:\/\/static\.exercisedb\.dev\/media\/.*\.gif$/,
+            // Exercise frames (public-domain free-exercise-db via jsDelivr) —
+            // cache on first view so sessions work offline.
+            urlPattern:
+              /^https:\/\/cdn\.jsdelivr\.net\/gh\/yuhonas\/free-exercise-db.*\.(jpg|jpeg|png)$/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'exercise-gifs',
-              expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheName: 'exercise-images',
+              expiration: { maxEntries: 2000, maxAgeSeconds: 60 * 60 * 24 * 365 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

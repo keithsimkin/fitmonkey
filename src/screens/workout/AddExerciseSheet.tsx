@@ -30,7 +30,7 @@ export function AddExerciseSheet({ open, bodyParts, equipment, excludeIds, onPic
               onClick={() => onPick(ex)}
               className="flex w-full items-center gap-3 rounded-2xl bg-black/[0.03] p-2.5 text-left active:opacity-80 dark:bg-white/[0.05]"
             >
-              <ExerciseGif mediaId={ex.mediaId} alt={ex.name} className="h-14 w-14 shrink-0" />
+              <ExerciseGif images={ex.images} alt={ex.name} className="h-14 w-14 shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[15px] font-semibold">{ex.name}</p>
                 <div className="mt-1 flex flex-wrap gap-1">

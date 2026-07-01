@@ -23,7 +23,7 @@ export function ExerciseInfoSheet({ exercise, onClose }: Props) {
     >
       {exercise && (
         <div className="space-y-4">
-          <ExerciseGif mediaId={exercise.mediaId} alt={exercise.name} className="aspect-square w-full" />
+          <ExerciseGif images={exercise.images} alt={exercise.name} className="aspect-square w-full" />
           <div className="flex flex-wrap gap-1.5">
             <MuscleTag label={exercise.target || exercise.bodyPart} />
             {exercise.secondary.slice(0, 3).map((m) => (

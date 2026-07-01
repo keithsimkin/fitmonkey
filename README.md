@@ -19,12 +19,15 @@ client-side (no backend).
 
 ## Data & animations
 
-Exercise data comes from the [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset)
-(1,324 exercises). `bun run data` fetches it, strips it to English-only and the
-fields we need (~0.85 MB), and writes `public/data/exercises.min.json`, which is
-seeded into IndexedDB on first launch. Animations are GIFs served from
-`https://static.exercisedb.dev/media/{media_id}.gif` and cached by the service
-worker for offline use.
+Exercise data comes from [free-exercise-db](https://github.com/yuhonas/free-exercise-db)
+(~870 exercises), which is released into the public domain (Unlicense) — no API
+key, rate limit, or disputed media ownership. `bun run data` fetches it, maps its
+taxonomy onto the fields we need, and writes `public/data/exercises.min.json`,
+which is seeded into IndexedDB on first launch. Each exercise ships two still
+frames (start / end); `ExerciseGif` cross-fades them to imply motion. Frames are
+served from jsDelivr
+(`https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/{path}`)
+and cached by the service worker for offline use.
 
 ## Develop
 

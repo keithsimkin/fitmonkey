@@ -194,7 +194,7 @@ function WorkoutInner() {
                 onClick={() => setSelected({ ex })}
                 className="card press flex w-full items-center gap-3 p-2.5 text-left"
               >
-                <ExerciseGif mediaId={ex.mediaId} alt={ex.name} className="h-16 w-16 shrink-0" />
+                <ExerciseGif images={ex.images} alt={ex.name} className="h-16 w-16 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[16px] font-semibold">{ex.name}</p>
                   <p className="text-[13px] text-neutral-500">
@@ -278,7 +278,7 @@ function PlanCard({
 }) {
   return (
     <button onClick={onClick} className="card press flex w-full items-center gap-3 p-2.5 text-left">
-      <ExerciseGif mediaId={planned.mediaId} alt={planned.name} className="h-16 w-16 shrink-0" />
+      <ExerciseGif images={planned.images} alt={planned.name} className="h-16 w-16 shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[16px] font-semibold">{planned.name}</p>
         <p className="mt-0.5 truncate text-[13px] capitalize text-neutral-500">{planned.target}</p>

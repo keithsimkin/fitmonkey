@@ -54,7 +54,7 @@ export interface PrescribedExercise {
   bodyPart: BodyPart;
   target: string;
   equipment: Equipment;
-  mediaId: string;
+  images: string[];
   role: Role;
   sets: number;
   repRangeLow: number;

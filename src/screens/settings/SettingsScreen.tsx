@@ -208,7 +208,7 @@ export function SettingsScreen() {
         </Card>
 
         <p className="px-1 text-center text-[12px] text-neutral-400">
-          On-device workout engine · Exercise data &amp; animations from the ExerciseDB dataset.
+          On-device workout engine · Exercise data &amp; images from free-exercise-db (public domain).
         </p>
       </div>
     </div>

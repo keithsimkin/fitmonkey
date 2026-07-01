@@ -134,7 +134,7 @@ export function CategoryScreen() {
                 onClick={() => setSelected(ex)}
                 className="card press flex w-full items-center gap-3 p-2.5 text-left"
               >
-                <ExerciseGif mediaId={ex.mediaId} alt={ex.name} className="h-16 w-16 shrink-0" />
+                <ExerciseGif images={ex.images} alt={ex.name} className="h-16 w-16 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[16px] font-semibold">{ex.name}</p>
                   <div className="mt-1 flex flex-wrap gap-1">

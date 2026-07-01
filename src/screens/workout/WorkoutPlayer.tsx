@@ -218,7 +218,7 @@ export function WorkoutPlayer({ dayKey, plan, splitDay, onExit, onFinish }: Prop
 
         {step?.kind === 'set' && !resting && (
           <>
-            <ExerciseGif mediaId={step.ex.mediaId} alt={step.ex.name} className="h-44 w-44" />
+            <ExerciseGif images={step.ex.images} alt={step.ex.name} className="h-44 w-44" />
             <p className="mt-4 max-w-xs text-center text-[22px] font-extrabold leading-tight">
               {step.ex.name}
             </p>

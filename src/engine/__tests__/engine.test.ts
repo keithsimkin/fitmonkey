@@ -20,7 +20,7 @@ function ex(p: Partial<Exercise> & { id: string; name: string }): Exercise {
     muscleGroup: p.muscleGroup ?? '',
     target: p.target ?? 'pectorals',
     secondary: p.secondary ?? [],
-    mediaId: p.mediaId ?? 'm',
+    images: p.images ?? ['a.jpg', 'b.jpg'],
     instructions: p.instructions ?? '',
   };
 }
@@ -32,7 +32,7 @@ function pres(p: Partial<PrescribedExercise>): PrescribedExercise {
     bodyPart: 'Chest',
     target: 'pectorals',
     equipment: 'Barbell',
-    mediaId: 'm',
+    images: ['a.jpg', 'b.jpg'],
     role: 'compound',
     sets: 3,
     repRangeLow: 6,

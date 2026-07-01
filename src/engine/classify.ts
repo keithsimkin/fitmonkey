@@ -2,14 +2,20 @@ import type { Equipment, Exercise } from '../types/exercise';
 import type { Role } from './types';
 
 // Large, multi-joint target muscles skew an exercise toward "compound".
+// Includes both legacy names and free-exercise-db's muscle vocabulary.
 const COMPOUND_TARGETS = new Set([
   'quads',
+  'quadriceps',
   'hamstrings',
   'glutes',
   'lats',
   'upper back',
+  'middle back',
+  'lower back',
   'pectorals',
+  'chest',
   'delts',
+  'shoulders',
 ]);
 
 // Small single-joint targets skew toward "isolation".
@@ -19,12 +25,14 @@ const ISOLATION_TARGETS = new Set([
   'calves',
   'forearms',
   'abs',
+  'abdominals',
   'obliques',
   'traps',
   'serratus anterior',
   'adductors',
   'abductors',
   'levator scapulae',
+  'neck',
   'spine',
 ]);
 
@@ -45,6 +53,9 @@ const ISOLATION_NAME = /\b(curl|extension|raise|fly|flye|kickback|shrug|crunch|c
  * (the safer "accessory" bucket) for unusual exercises.
  */
 export function classifyRole(ex: Exercise): Role {
+  // Trust the source's own label when the dataset provides one.
+  if (ex.mechanic) return ex.mechanic;
+
   let score = 0;
 
   const target = ex.target.toLowerCase();

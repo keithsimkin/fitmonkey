@@ -37,7 +37,7 @@ interface ExclusionRule {
 // Map each injury flag to muscles / body parts / movements to avoid.
 const INJURY_EXCLUSIONS: Record<InjuryFlag, ExclusionRule> = {
   lowerBack: {
-    targets: ['spine'],
+    targets: ['spine', 'lower back'],
     namePattern: /deadlift|good morning|back extension|hyperextension/i,
   },
   knee: {

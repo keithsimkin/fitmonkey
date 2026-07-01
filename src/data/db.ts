@@ -15,7 +15,9 @@ interface ExerciseDB extends DBSchema {
 
 const DB_NAME = 'workout-db';
 const DB_VERSION = 1;
-const SEED_KEY = 'seeded-v1';
+// Bumped when the exercise catalog source changes (ids + fields differ), so
+// existing installs re-seed from the new dataset instead of keeping stale rows.
+const SEED_KEY = 'seeded-v2';
 
 let dbPromise: Promise<IDBPDatabase<ExerciseDB>> | null = null;
 
@@ -44,6 +46,7 @@ export async function ensureSeeded(): Promise<void> {
   const exercises: Exercise[] = await res.json();
 
   const tx = db.transaction('exercises', 'readwrite');
+  await tx.store.clear(); // drop any prior-catalog rows before re-seeding
   await Promise.all(exercises.map((e) => tx.store.put(e)));
   await tx.done;
   await db.put('meta', { key: SEED_KEY, value: Date.now() });

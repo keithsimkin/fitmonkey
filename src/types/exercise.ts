@@ -1,4 +1,6 @@
-// The exercise taxonomy as it appears in hasaneyldrm/exercises-dataset.
+// The exercise taxonomy, mapped from the public-domain yuhonas/free-exercise-db
+// dataset (see scripts/preprocess-exercises.ts) onto the coarse buckets the app
+// uses for splits, filtering, and classification.
 
 export type BodyPart =
   | 'Upper Arms'
@@ -28,13 +30,16 @@ export type Equipment =
 
 /** Slimmed exercise record stored in IndexedDB (English-only). */
 export interface Exercise {
-  id: string; // e.g. "0001"
+  id: string; // e.g. "Barbell_Bench_Press_-_Medium_Grip"
   name: string;
   bodyPart: BodyPart;
   equipment: Equipment;
-  muscleGroup: string;
+  muscleGroup: string; // source `category`, e.g. "strength"
   target: string;
   secondary: string[];
-  mediaId: string; // -> buildGifUrl(mediaId)
+  /** Source compound/isolation label when known; classifier falls back to a heuristic. */
+  mechanic?: 'compound' | 'isolation';
+  /** Two still frames (start / end), relative paths -> buildImageUrl(path). */
+  images: string[];
   instructions: string; // English, single string
 }

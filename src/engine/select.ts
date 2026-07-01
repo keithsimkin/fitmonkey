@@ -31,7 +31,7 @@ function toPrescribed(
     bodyPart: ex.bodyPart,
     target: ex.target,
     equipment: ex.equipment,
-    mediaId: ex.mediaId,
+    images: ex.images,
     role,
     sets: scaledSets(baseSets, experience),
     repRangeLow: low,

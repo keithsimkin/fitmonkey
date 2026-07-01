@@ -2,7 +2,7 @@
 export const APP_VERSION = '1.0.0';
 
 /** Where the exercise catalog & animations originate (shown as attribution). */
-export const DATA_SOURCE = 'ExerciseDB dataset';
+export const DATA_SOURCE = 'free-exercise-db (public domain)';
 
 /** Human-readable byte size, e.g. 12_900_000 → "12.3 MB". */
 export function formatBytes(bytes: number): string {

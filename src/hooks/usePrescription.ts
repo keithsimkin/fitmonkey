@@ -19,7 +19,7 @@ function toPlan(p: WorkoutPrescription): DailyPlan {
       exerciseId: e.exerciseId,
       name: e.name,
       target: e.target,
-      mediaId: e.mediaId,
+      images: e.images,
       role: e.role,
       sets: e.sets,
       repRangeLow: e.repRangeLow,

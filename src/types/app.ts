@@ -39,7 +39,7 @@ export interface PlannedExercise {
   exerciseId: string;
   name: string;
   target: string;
-  mediaId: string;
+  images: string[];
   role: Role;
   sets: number;
   repRangeLow: number;
