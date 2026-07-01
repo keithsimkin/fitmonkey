@@ -8,6 +8,12 @@ interface Props {
   alt: string;
   className?: string;
   rounded?: boolean;
+  /**
+   * Cross-fade the frames to imply motion. Off by default: list thumbnails stay
+   * static while browsing, and only the opened/focused view (a detail sheet or
+   * the active workout exercise) animates.
+   */
+  animate?: boolean;
 }
 
 // How long each frame is held before crossfading to the next. Slow enough to
@@ -16,11 +22,18 @@ const FRAME_MS = 750;
 
 /**
  * Exercise animation faked from the source's two still frames (start / end):
- * the frames are stacked and cross-faded on a timer to imply motion. Falls back
- * to a static first frame when reduced motion is preferred or only one frame
- * exists. Skeleton placeholder while the first frame loads; glyph on error.
+ * when `animate` is on the frames are stacked and cross-faded on a timer to
+ * imply motion. Falls back to a static first frame when not animating, reduced
+ * motion is preferred, or only one frame exists. Skeleton placeholder while the
+ * first frame loads; glyph on error.
  */
-export function ExerciseGif({ images, alt, className = '', rounded = true }: Props) {
+export function ExerciseGif({
+  images,
+  alt,
+  className = '',
+  rounded = true,
+  animate = false,
+}: Props) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [frame, setFrame] = useState(0);
@@ -48,16 +61,20 @@ export function ExerciseGif({ images, alt, className = '', rounded = true }: Pro
     }
   }, [firstUrl]);
 
-  // Cross-fade between frames once the first is visible. Skipped for a single
-  // frame or when the user prefers reduced motion.
+  // Cross-fade between frames once the first is visible. Skipped while browsing
+  // (animate off), for a single frame, or when the user prefers reduced motion.
+  // Reset to the first frame whenever animation stops so it doesn't freeze mid-rep.
   useEffect(() => {
-    if (error || urls.length < 2 || !loaded) return;
+    if (!animate || error || urls.length < 2 || !loaded) {
+      setFrame(0);
+      return;
+    }
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
     const timer = window.setInterval(() => {
       setFrame((f) => (f + 1) % urls.length);
     }, FRAME_MS);
     return () => window.clearInterval(timer);
-  }, [error, loaded, urls.length]);
+  }, [animate, error, loaded, urls.length]);
 
   return (
     <div

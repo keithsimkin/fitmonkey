@@ -26,7 +26,7 @@ export function ExerciseDetailSheet({ exercise, dayKey, planned, onClose }: Prop
     >
       {exercise && (
         <div className="space-y-4">
-          <ExerciseGif images={exercise.images} alt={exercise.name} className="aspect-square w-full" />
+          <ExerciseGif images={exercise.images} alt={exercise.name} animate className="aspect-square w-full" />
 
           <div className="flex flex-wrap gap-1.5">
             <MuscleTag label={exercise.target || exercise.bodyPart} />
