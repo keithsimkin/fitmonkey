@@ -244,7 +244,7 @@ function AccountSection() {
         <div className="min-w-0 flex-1">
           <p className="text-[16px] font-semibold">Sign in to sync</p>
           <p className="text-[13px] text-neutral-500 dark:text-neutral-400">
-            Back up &amp; restore across devices with a magic link
+            Back up &amp; restore across devices with email &amp; password
           </p>
         </div>
         <ChevronRight className="h-5 w-5 shrink-0 text-neutral-300 dark:text-neutral-600" />

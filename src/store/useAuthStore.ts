@@ -11,8 +11,14 @@ interface AuthState {
 
   /** Wire up the session and subscribe to auth changes. Call once at boot. */
   init: () => void;
-  /** Email magic-link (OTP) sign-in. Resolves once the email is sent. */
-  signInWithMagicLink: (email: string) => Promise<void>;
+  /** Email + password sign-in. Throws on bad credentials. */
+  signInWithPassword: (email: string, password: string) => Promise<void>;
+  /**
+   * Email + password sign-up. Returns `needsConfirmation: true` when the project
+   * requires email confirmation (no session yet); otherwise the user is signed
+   * in immediately.
+   */
+  signUp: (email: string, password: string) => Promise<{ needsConfirmation: boolean }>;
   signOut: () => Promise<void>;
 }
 
@@ -41,13 +47,23 @@ export const useAuthStore = create<AuthState>()((set) => ({
     });
   },
 
-  signInWithMagicLink: async (email) => {
+  signInWithPassword: async (email, password) => {
     if (!supabase) throw new Error('Supabase is not configured.');
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  },
+
+  signUp: async (email, password) => {
+    if (!supabase) throw new Error('Supabase is not configured.');
+    const { data, error } = await supabase.auth.signUp({
       email,
+      password,
       options: { emailRedirectTo: window.location.origin },
     });
     if (error) throw error;
+    // No session means the project has email confirmation on — the user must
+    // click the confirmation link before they can sign in.
+    return { needsConfirmation: !data.session };
   },
 
   signOut: async () => {
